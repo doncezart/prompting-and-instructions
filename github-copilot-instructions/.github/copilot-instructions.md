@@ -10,11 +10,20 @@ source of truth for all project work. Always prioritize them over assumptions.
 At the start of every session, before writing any code or making any suggestions:
 
 1. Check that `docs/BRIEF.md` exists and has content beyond its placeholder headers.
-   If it is missing or empty, stop and notify the user: "BRIEF.md is empty — please
-   fill it in before we proceed, or ask me to scaffold the project first."
-   If it exists but has sections still containing placeholder text (e.g. "TODO", "TBD",
-   `<!-- fill this in -->`), proceed but list the incomplete sections at the top of
-   your first response.
+   - If the file does not exist at all, stop and notify the user: "BRIEF.md is missing
+     — ask me to scaffold the project first."
+   - If it exists but is empty or contains only placeholder text (e.g. "TODO", "TBD",
+     `<!-- fill this in -->`), do not stop. Instead, analyze the project yourself:
+     scan the codebase, `package.json` / `requirements.txt` / equivalent manifest,
+     folder structure, existing source files, and any config files to infer the stack,
+     architecture, and purpose. Fill in `docs/BRIEF.md` based on what you find, mark
+     any section you could not confidently determine with
+     `<!-- could not infer — please review -->`, then notify the user: "BRIEF.md was
+     empty — I've filled it in from the codebase. Please review it before we continue,
+     especially any sections marked for review." Do not proceed with the user's request
+     until they confirm or correct the file.
+   - If it exists and has real content but some sections are still placeholder text,
+     proceed but list the incomplete sections at the top of your first response.
 2. Read `docs/BRIEF.md` in full.
 3. Read `docs/TASKS.md` to identify the current priority.
 4. Proceed based on the user's instruction, grounded in those two files.
