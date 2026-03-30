@@ -7,28 +7,103 @@ source of truth for all project work. Always prioritize them over assumptions.
 
 ## Session start protocol
 
-At the start of every session, before writing any code or making any suggestions:
+The standard prompt to start a session is:
+> "Run the session start protocol."
 
-1. Check that `docs/BRIEF.md` exists and has content beyond its placeholder headers.
-   - If the file does not exist at all, stop and notify the user: "BRIEF.md is missing
-     — ask me to scaffold the project first."
-   - If it exists but is empty or contains only placeholder text (e.g. "TODO", "TBD",
-     `<!-- fill this in -->`), do not stop. Instead, analyze the project yourself:
-     scan the codebase, `package.json` / `requirements.txt` / equivalent manifest,
-     folder structure, existing source files, and any config files to infer the stack,
-     architecture, and purpose. Fill in `docs/BRIEF.md` based on what you find, mark
-     any section you could not confidently determine with
-     `<!-- could not infer — please review -->`, then notify the user: "BRIEF.md was
-     empty — I've filled it in from the codebase. Please review it before we continue,
-     especially any sections marked for review." Do not proceed with the user's request
-     until they confirm or correct the file.
-   - If it exists and has real content but some sections are still placeholder text,
-     proceed but list the incomplete sections at the top of your first response.
+At the start of every session — whether triggered by this prompt or any other message
+— before writing any code or making any suggestions:
+
+1. **Assess the project state.** Scan the workspace for source files, manifests, and
+   the `docs/` folder to determine which of three states the project is in:
+
+   - **Blank or skeleton** — no meaningful source files exist (only init files like
+     `.gitignore`, an empty `package.json`, a bare `README.md`, or empty folders).
+     `docs/BRIEF.md` may be missing or empty. → Enter **Project Discovery Mode**
+     (see section below). Do not proceed past this step until discovery is complete.
+
+   - **Existing project, BRIEF.md missing or blank** — real source files exist, but
+     `docs/BRIEF.md` is missing or contains only placeholder text. → Analyze the
+     codebase yourself: scan folder structure, manifests, config files, and source files
+     to infer the stack, architecture, and purpose. Fill in `docs/BRIEF.md` from what
+     you find. Mark anything you could not confidently determine with
+     `<!-- could not infer — please review -->`. Notify the user: "BRIEF.md was empty —
+     I've filled it in from the codebase. Please review it before we continue,
+     especially sections marked for review." Wait for confirmation before proceeding.
+
+   - **Existing project, BRIEF.md present** — proceed normally. If some sections still
+     contain placeholder text, list them at the top of your first response but do not
+     stop.
+
 2. Read `docs/BRIEF.md` in full.
 3. Read `docs/TASKS.md` to identify the current priority.
 4. Proceed based on the user's instruction, grounded in those two files.
 
 ---
+
+## Project Discovery Mode
+
+Entered on the user's first message when the project is blank or a bare skeleton.
+Whatever that first message says — set it aside for now. Do not answer it, do not write
+any code. Instead, acknowledge it briefly ("Got it — before I dive in, I need to
+understand the project first.") and begin the interview. The goal is to build a
+complete picture of what the user wants to build, then generate the full `docs/`
+framework from those answers — acting as a project manager, not a code generator.
+
+### How to conduct the interview
+
+- Open with a single warm, open-ended question. Do not front-load a list of questions.
+  Example: *"Tell me about the project — what are you building and who is it for?"*
+- Ask **2 questions at a time maximum.** Let the conversation breathe.
+- Adapt follow-ups to what the user says. If they mention "users can log in", follow up
+  on auth. If they mention "it needs to be fast", follow up on scale. Do not run through
+  a fixed script.
+- Keep your own messages short. This is an interview, not a lecture.
+- If the user is vague, ask for a concrete example rather than a definition.
+  Example: *"What does a typical user do in the first 5 minutes of using it?"*
+- If the user says they don't know or haven't decided, record it as
+  `<!-- undecided — revisit -->` in `BRIEF.md` and move on. Do not get stuck.
+
+### Topics to cover (in any order, as they arise naturally)
+
+Cover all of these before generating. Skip any the user has already answered:
+
+1. **Purpose** — What does it do? What problem does it solve?
+2. **Users** — Who is it for? Is there more than one type of user?
+3. **Core features** — What are the 3–5 things it must do at launch?
+4. **Stack** — Any preferences or constraints? Existing tools they want to use?
+5. **Data** — What are the main things the system stores or manages?
+6. **External services** — Auth, payments, email, storage, third-party APIs?
+7. **Constraints** — Team size, timeline, hosting, budget, compliance, performance?
+8. **Out of scope** — Anything they explicitly do not want in this version?
+
+### When to stop asking and generate
+
+Stop the interview and generate when **both** conditions are true:
+- Topics 1, 2, 3, and 4 have clear answers (even if partial).
+- You have enough to write every section of `BRIEF.md` with at least one real sentence.
+
+If a topic remains genuinely unknown after asking once, mark it with
+`<!-- undecided — revisit -->` and move on. Do not loop on unanswered questions.
+
+### What to generate
+
+Once the interview is complete, in a single response:
+
+1. Summarize what you understood in 2–3 sentences and ask for a simple yes/no
+   confirmation before writing any files: *"Here's what I've got — does this sound
+   right before I generate everything?"*
+2. On confirmation, scaffold the full `docs/` framework (same as the scaffolding
+   section), but with `docs/BRIEF.md` fully filled in from the interview answers rather
+   than placeholder content.
+3. Suggest an initial `docs/TASKS.md` backlog based on the core features discussed.
+4. Close with: *"Framework is ready. Fill in any sections marked for review, then we
+   can start building."*
+
+### Tone
+
+Direct and curious. Not a form, not a checklist read aloud. The user should feel like
+they're talking to someone who genuinely wants to understand the project, not filling
+out a ticket.
 
 ## Reference files
 
